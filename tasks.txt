@@ -2,3 +2,5 @@
 complete kiosk class's checkout and return methods with unit tests (90 minutes)
 patron store with unit tests (similar to transaction store) (patron store class and a patron class) (90 minutes)
 items store with unit tests  (60 minutes)
+
+3/4/24 authentication and authorization
