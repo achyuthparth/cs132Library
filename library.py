@@ -3,44 +3,22 @@
 # books contains fiction, non-fiction dictionaries
 # fictions contains kids, graphic-novels, novels dictionaries
 
-
-from kiosk import Kiosk
-from item_storage import Book, DVD, Misc
 from collections import OrderedDict
+from item_storage import Book, DVD, Misc
 
-class Book_storage(OrderedDict):
+class Book_storage(OrderedDict): # key will be item name, value will be frequency
     pass
-# key will be item name, value will be frequency
 
 class DVD_storage(OrderedDict):
-    pass
+    def checkout(): # try to reduce frequency, if it does not work then throw exception for checked out
+        return
 
 class Misc_storage(OrderedDict):
     pass
 
-
-class Library:
+class Library: # generate reports
     books: Book_storage
     DVDs : DVD_storage
     misc : Misc_storage
-    
-    def __init__(self, books, DVDs, misc):
-        pass
-    
-    @staticmethod
-    def checkout(item):
-        if type(item) == Book:
-            Kiosk.book_checkout(item)
-        if type(item) == DVD:
-            Kiosk.DVD_checkout(item)
-        if type(item) == Misc:
-            Kiosk.misc_checkout(item)
-            
-    @staticmethod
-    def add_item(item):
-        if type(item) == Book:
-            Kiosk.book_insert(item)
-        if type(item) == DVD:
-            Kiosk.DVD_insert(item)
-        if type(item) == Misc:
-            Kiosk.misc_insert(item)
+    patrons : set
+    librarians : set
