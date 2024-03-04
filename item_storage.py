@@ -1,8 +1,10 @@
 class Book:
     title: str
-    details : str
     id: int
     author : str
     isbn : str
+    quantity : int
+    available : int
+    
     def details(self):
-        return self.details
+        return f"Title: {self.title}, ID: {self.id}, Author: {self.author}, ISBN: {self.isbn}, Quantity: {self.quantity}, Available: {self.available}"
