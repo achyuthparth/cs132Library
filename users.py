@@ -10,10 +10,13 @@ class User:
 
 
 class Patron(User):
-    __password : str
+    def __init__(self):
+        super().__init__(self)
+    
+    
 
 class Librarian(User):
-    __password : str
+    
     
     @classmethod
     def create_patron(cls):

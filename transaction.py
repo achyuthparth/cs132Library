@@ -2,6 +2,7 @@ from os import path
 import json
 import file_services as FS
 import datetime
+from collections import OrderedDict
 
 class Transaction:
     customer_id : int
@@ -37,19 +38,20 @@ class Transaction_Decoder(json.JSONDecoder):
 class Transaction_File(Transaction_Store):
     def __init__(self, fileName = "Transaction_List.json"):
         self.FileName = FS.CreateFilePath(fileName)
+        self.transactions = self.ReadFile()
 
     def ReadFile(self):
         fileExists = path.exists(self.FileName)
         if fileExists:
-            with open(self.FileName, 'r') as infile:
-                json_object = json.load(infile, cls = Transaction_Decoder)
+            with open(self.FileName, 'r') as self.FileName:
+                transactions = json.load(self.FileName, cls = Transaction_Decoder)
         else:
-            json_object = {}
-        return json_object
+            transactions = OrderedDict()
+        return transactions
 
-    def WriteFile(self, vocabList):
+    def WriteFile(self):
         with open(self.FileName, "w") as outfile:
-            json.dump(vocabList, outfile, cls = Transaction_Encoder)
+            json.dump(self.transactions, outfile, cls = Transaction_Encoder)
         return
 
     def add_transaction(self, transaction):
