@@ -9,5 +9,17 @@ unit tests for kiosk checkout
     wrong input for item, customer
     validate find
     implement due date verification
+unit tests:
+    add transaction
+
+complete:
+    transaction encoded into json object
+    item store logic
+
+questions:
+    when decoding, the json.load is loading the objects correctly but for no reason seems to finally load the whole dictionary
+    how do I create the empty dictionary in file services?
+    where do I store the book logic?
+    the unittest is not testing some functions
 
 3/5/2024 authentication and authorization
