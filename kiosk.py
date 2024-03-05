@@ -14,12 +14,12 @@ class Kiosk:
 # create new transaction
         new_transaction = Transaction(customer.id, item.id)
         self.transaction_store.add_transaction(new_transaction)
-        receipt = "".join(tuple(map(str, (new_transaction.item_id, new_transaction.customer_id, new_transaction.checkout_date))))
+        receipt = f"{new_transaction.item_id} {new_transaction.customer_id} {new_transaction.checkout_date}"
         return receipt
         
     def return_item(self, receipt): # handle edge cases, compute fines
         transaction = self.transaction_store.find_transaction(receipt)
-        transaction.return_date = datetime.datetime.utcnow()
+        transaction.return_date = datetime.datetime.utcnow().isoformat()
         self.transaction_store.save_to_store()
 class Customer_kiosk(Kiosk):
     

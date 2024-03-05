@@ -3,7 +3,7 @@ import json
 import file_services as FS
 import datetime
 
-class Transaction(dict):
+class Transaction:
     customer_id : int
     item_id : str
     checkout_date : datetime.datetime
@@ -15,6 +15,16 @@ class Transaction(dict):
         self.customer_id = customer_id
         self.item_id = item_id
         self.checkout_date = datetime.datetime.utcnow()
+        self.return_date = None
+        delta = datetime.timedelta(weeks = 3)
+        self.due_date = self.checkout_date + delta # 3 weeks time to return the book
+        self.fine = 0 #self.calculate_fine() # calculates the fines based on how late the return is, $1 per week
+    '''
+    def calculate_fine(self):
+        if self.return_date == None:
+            time_difference = self.due_date - datetime.datetime.utcnow()
+        else: time_difference = self.due_date - self.return_date
+        return self.fine'''
 
 class Transaction_Store:
     
@@ -30,14 +40,14 @@ class Transaction_Store:
 class Transaction_Encoder(json.JSONEncoder):
     def default(self, object):
         if isinstance(object, Transaction):
-            return {
+            return { f"{object.item_id} {object.customer_id} {object.checkout_date}" :{
                 "customer_id" : object.customer_id,
                 "item_id" : object.item_id,
-                "checkout_date" : object.checkout_date,
-                "return_date" : object.return_date,
-                "due_date" : object.due_date,
+                "checkout_date" : str(object.checkout_date),
+                "return_date" : str(object.return_date),
+                "due_date" : str(object.due_date),
                 "fine" : object.fine
-            }
+            }}
         return super().default(object)
 
 class Transaction_Decoder(json.JSONDecoder):
@@ -45,12 +55,18 @@ class Transaction_Decoder(json.JSONDecoder):
         json.JSONDecoder.__init__(self, object_hook = self.to_object)
         
     def to_object(self, d):
-        return Transaction(d["customer_id"], d["item_id"], d["checkout_date"], d["return_date"], d["due_date"], d["fine"])
-
+        if d == (None or {}):
+            return {}
+        for key, values in d.items():
+            d[key] = Transaction(values["customer_id"], values["item_id"], datetime.datetime.fromisoformat(values["checkout_date"]), datetime.datetime.fromisoformat(values["return_date"]), datetime.datetime.fromisoformat(values["due_date"]), values["fine"])
+        return d
 class Transaction_File(Transaction_Store):
     def __init__(self, file_name = "Transaction_List.json"):
         self.file_name = FS.CreateFilePath(file_name)
+        # error handling for load file
         self.transactions = self.load_file()
+        if self.transactions is None:
+            self.transactions = {}
     
     def load_file(self):
         file_exists = path.exists(self.file_name)
@@ -66,7 +82,7 @@ class Transaction_File(Transaction_Store):
             json.dump(self.transactions, file_name, cls = Transaction_Encoder, sort_keys = True)
 
     def add_transaction(self, transaction):
-        receipt = "".join(tuple(map(str, (transaction.item_id, transaction.customer_id, transaction.checkout_date))))
+        receipt = f"{transaction.item_id} {transaction.customer_id} {transaction.checkout_date}"
         self.transactions[receipt] = transaction
         self.write_file()
 

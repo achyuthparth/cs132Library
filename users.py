@@ -25,21 +25,25 @@ class User_Storage:
     def add_librarian(self, librarian):
         pass
 
-class User_Encoder(json.JSONEncoder):
+class Patron_Encoder(json.JSONEncoder):
     def default(self, object):
         if isinstance(object, Patron):
-            return
-        if isinstance(object, Librarian):
-            return
+            return {
+                "name" : object.name,
+                "email" : object.email,
+                "number" : object.number,
+                "id" : object.id
+            }
         return super().default(object)
 
-class User_Decoder(json.JSONDecoder):
+class Patron_Decoder(json.JSONDecoder):
     def __init__(self):
         super().__init__(self, object_hook = self.to_object)
     
-    #def to_object(self, d):
-class User_File(User_Storage):
-    def __init__(self, file_name = "User_List.json"):
+    def to_object(self, d):
+        return Patron(d["name"], d["email"], d["number"], d["id"])
+class Patron_File(User_Storage):
+    def __init__(self, file_name = "Patron_List.json"):
         self.file_name = FS.CreateFilePath(file_name)
         self.books = self.load_file(self)
     

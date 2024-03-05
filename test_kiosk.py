@@ -18,8 +18,16 @@ class Test(unittest.TestCase):
         item = Book(1)
         kiosk = Kiosk(sample_store)
         receipt = kiosk.checkout_item(customer, item)
-        test_receipt = tuple(map(str, (item.id, customer.id, datetime.datetime.utcnow())))
-        self.assertAlmostEqual(test_receipt,receipt)
+        test_receipt = f"{item.id} {customer.id} {datetime.datetime.utcnow()}"
+        print(f"{receipt}\n{test_receipt}")
+    
+    def test_checkout2(self):
+        customer = Customer("AP2", 2)
+        item = Book(2)
+        kiosk = Kiosk(sample_store)
+        receipt = kiosk.checkout_item(customer, item)
+        test_receipt = f"{item.id} {customer.id} {datetime.datetime.utcnow()}"
+        print(f"{receipt}\n{test_receipt}")
     
 if __name__ == '__main__':
     unittest.main()

@@ -11,7 +11,6 @@ class Book:
     def details(self):
         return f"Title: {self.title}, Author: {self.author}, ISBN: {self.isbn}, Quantity: {self.quantity}, Available: {self.available}"
 
-
 class Book_Storage:
     def add_book(self, book):
         pass
