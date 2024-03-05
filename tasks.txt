@@ -4,3 +4,9 @@ patron store with unit tests (similar to transaction store) (patron store class 
 items store with unit tests  (60 minutes)
 
 3/4/24 authentication and authorization
+
+unit tests for kiosk checkout
+    book already checkout out 
+    wrong input for item, customer
+    validate find
+    implement due date verification
