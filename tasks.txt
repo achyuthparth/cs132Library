@@ -17,8 +17,7 @@ complete:
     item store logic and unit testing with edge cases
 
 questions:
-    when decoding, the json.load is loading the objects correctly but for no reason seems to finally load the whole dictionary
-    how do I create the empty dictionary in file services?
+    why, when decoding, the json.load is loading the objects correctly but at the end seems to load the whole dictionary?
     where do I store the book logic?
     
 

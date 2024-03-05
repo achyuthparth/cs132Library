@@ -22,7 +22,7 @@ class Transaction:
         if due_date == None: self.due_date = self.checkout_date + delta # 3 weeks time to return the book
         else: self.due_date = due_date
         if fine == None: self.fine = 0 #self.calculate_fine() # calculates the fines based on how late the return is, $1 per week
-        else: self.fine = fine
+        else: self.fine = self.calculate_fine()
     
     def calculate_fine(self):
         if self.return_date == self.checkout_date:
