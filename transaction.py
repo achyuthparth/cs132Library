@@ -61,15 +61,15 @@ class Transaction_Encoder(json.JSONEncoder):
 class Transaction_Decoder(json.JSONDecoder):
     def __init__(self):
         json.JSONDecoder.__init__(self, object_hook = self.to_object)
-        
+    
     def to_object(self, d):
         if d == (None or {}):
             return {}
         return Transaction(d["customer_id"], d["item_id"], datetime.datetime.strptime(d["checkout_date"], "%Y-%m-%d %H:%M:%S"), datetime.datetime.strptime(d["return_date"], "%Y-%m-%d %H:%M:%S"), datetime.datetime.strptime(d["due_date"], "%Y-%m-%d %H:%M:%S"), d["fine"])
-
+class No_Transaction_Present(Exception): pass
 class Transaction_File(Transaction_Store):
     def __init__(self, file_name = "Transaction_List.json"):
-        self.file_name = FS.CreateFilePath(file_name)
+        self.file_name = FS.create_file_path(file_name)
         # error handling for load file
         self.transactions = self.load_file()
         if self.transactions is None:
@@ -93,7 +93,11 @@ class Transaction_File(Transaction_Store):
         self.write_file()
 
     def find_transaction(self, receipt):
-        return self.transactions.get(receipt)
+        try:
+            for key, values in self.transactions.items():
+                if key == receipt:
+                    return values
+        except: No_Transaction_Present
     
     def save_to_store(self):
         self.write_file()

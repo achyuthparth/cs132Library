@@ -6,6 +6,7 @@ from transaction import Transaction_Store, Transaction
 
 class Not_Book(TypeError): pass
 class Not_Patron(TypeError): pass
+class Not_Librarian(TypeError): pass
 class Kiosk:
     transaction_store : Transaction_Store
     def __init__(self, transaction_store):
@@ -33,7 +34,7 @@ class Kiosk:
     def return_item(self, receipt): # handle edge cases, compute fines
         transaction = self.transaction_store.find_transaction(receipt)
         transaction.return_date = datetime.datetime.utcnow()
-        return f"{receipt} {transaction.return_date}"
         self.transaction_store.save_to_store()
+        return f"{receipt} {transaction.return_date}"
 class Customer_kiosk(Kiosk): pass
 class Librarian_Kiosk(Kiosk): pass

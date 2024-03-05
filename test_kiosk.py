@@ -12,36 +12,43 @@ class Book:
         self.id = num
 
 sample_store = Transaction_File()
-class Test(unittest.TestCase):
+class TestKiosk(unittest.TestCase):
+    cls_r1 = ""
+    cls_r2 = ""
+    
     def test_checkout1(self):
         customer = Customer("AP", 1)
         item = Book(1)
         kiosk = Kiosk(sample_store)
         receipt = kiosk.checkout_item2(customer, item)
-        test_receipt = f"{customer.id} {item.id} 2024-03-05 11:55:14.240788"
-        print(f"\n{receipt}\n{test_receipt}\n")
+        TestKiosk.cls_r1 = receipt
+        test_receipt1 = f"{customer.id} {item.id} {datetime.datetime.utcnow()}"
+        print(f"\n{receipt}\n{test_receipt1}\n")
     
     def test_checkout2(self):
         customer = Customer("AP2", 2)
         item = Book(2)
         kiosk = Kiosk(sample_store)
         receipt = kiosk.checkout_item2(customer, item)
-        test_receipt = f"{customer.id} {item.id} 2024-03-05 11:55:14.241794"
-        print(f"\n{receipt}\n{test_receipt}\n")
+        TestKiosk.cls_r2 = receipt
+        test_receipt2 = f"{customer.id} {item.id} {datetime.datetime.utcnow()}"
+        print(f"\n{receipt}\n{test_receipt2}\n")
     
-    def return_item1(self):
+    def test_return_item1(self):
         kiosk = Kiosk(sample_store)
-        receipt1  = f"1 1 2024-03-05 11:55:14.240788"
-        kiosk.return_item(receipt1)
-        test_receipt1 = f"1 1 2024-03-05 11:55:14.240788 {datetime.datetime.utcnow()}"
-        print(f"\n{receipt1}\n{test_receipt1}\n")
+        #receipt1  = f"1 1 2024-03-05 20:49:56.383287"
+        receipt = TestKiosk.cls_r1
+        receipt1 = kiosk.return_item(receipt)
+        test_receipt = f"{TestKiosk.cls_r1} {datetime.datetime.utcnow()}"
+        print(f"\n{receipt1}\n{test_receipt}\n")
     
-    def return_item2(self):
+    def test_return_item2(self):
         kiosk = Kiosk(sample_store)
-        receipt2  = f"2 2 2024-03-05 11:55:14.241794"
-        kiosk.return_item(receipt2)
-        test_receipt2 = f"2 2 2024-03-05 11:55:14.241794 {datetime.datetime.utcnow()}"
-        print(f"\n{receipt2}\n{test_receipt2}\n")
+        #receipt2  = f"2 2 2024-03-05 20:50:26.791286"
+        receipt = TestKiosk.cls_r2
+        receipt2 = kiosk.return_item(receipt)
+        test_receipt = f"{TestKiosk.cls_r2} {datetime.datetime.utcnow()}"
+        print(f"\n{receipt2}\n{test_receipt}\n")
     
 if __name__ == '__main__':
     unittest.main()

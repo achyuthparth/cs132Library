@@ -1,0 +1,28 @@
+https://www.quickread.in/how-to-implement-rbac-in-python/#1_Modeling_Permissions
+
+authentication is the process of verifying the identity (usually done through login)
+authorization is the process of verifying whether the user has privileges to preform an action (done at the time of action)
+    form of mapping (dictionary)
+        key: action name (checkout book)
+        value: who is allowed (patron can checkout) (librarian can create patron) (allowed list aka access control)
+    method needs to check who the use is and block based on block-list
+
+Roles – A collection of permissions. Roles are assigned to users. Example roles: Administrator, Editor, Guest etc.
+Permissions – Authorization to perform certain operations like view, edit, delete etc. Permissions are grouped under roles.
+Users – Individual users in the system. Users can be assigned multiple roles.
+Sessions – Mapping between user and their activated role(s) for a login session.
+
+use decorators to check if the user type is correctly
+
+def roles_required():
+            if type(user) == Librarian:
+                return func(*args, **kwargs)
+            else:
+                raise Exception('User is not admin')
+@roles_required('admin')
+def delete_user(user_id):
+    user = User.get(user_id)
+    user.delete()
+
+questions about process:
+    I will create an admin class to represent permissions, roles, modeling users and sessions, and checking access

@@ -44,7 +44,7 @@ class Book_Encoder(json.JSONEncoder): # json encoder/decoder for custom book obj
 
 class Book_Decoder(json.JSONDecoder):
     def __init__(self):
-        super().__init__(self, object_hook = self.to_object)
+        json.JSONDecoder.__init__(self, object_hook = self.to_object)
     
     def to_object(self, d):
         if d == ({} or None):
@@ -55,8 +55,8 @@ class Book_None_Available(Exception): pass
 class Not_A_Book(TypeError): pass
 class Book_File(Book_Storage): # concrete storage class which utilizes json
     def __init__(self, file_name = "Book_List.json"):
-        self.file_name = FS.CreateFilePath(file_name)
-        self.books = self.load_file(self)
+        self.file_name = FS.create_file_path(file_name)
+        self.books = self.load_file()
         if self.books is None:
             self.books = {}
     
@@ -69,8 +69,8 @@ class Book_File(Book_Storage): # concrete storage class which utilizes json
         return books_json
     
     def write_file(self):
-        with open(self.file_name) as file_name:
-            json.dumps(self.books, file_name, cls = Book_Encoder)
+        with open(self.file_name, "w") as file_name:
+            json.dump(self.books, file_name, cls = Book_Encoder)
     
     def find_book(self, book):
         if not(isinstance(book, Book)):
@@ -84,10 +84,10 @@ class Book_File(Book_Storage): # concrete storage class which utilizes json
         if isinstance(book, Book):
             if book.isbn not in self.books:
                 self.books[book.isbn] = book
-                self.books[book.isbn].available = 1
+                self.books[book.isbn].available = book.quantity
             else:
-                self.books[book.isbn].quantity += 1
-                self.books[book.isbn].available += 1
+                self.books[book.isbn].quantity += book.quantity
+                self.books[book.isbn].available += book.quantity
         else: raise Not_A_Book
         self.save_to_store()
     
