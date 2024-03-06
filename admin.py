@@ -1,10 +1,10 @@
 from users import User, Patron, Librarian
-class Permission:
+class Permission: # implement store
     name : str
-    def __init__(self, name) -> None:
+    def __init__(self, name):
         self.name = name
     
-    def __str__(self) -> str:
+    def __str__(self):
         return self.name
 
 class Not_A_Permission(TypeError): pass
@@ -16,6 +16,7 @@ class Role:
     def __init__(self, name, permissions = {}):
         self.name = name
         self.permissions = permissions
+        
 
     def add_permission(self, permission):
         if isinstance(permission, Permission):
@@ -30,7 +31,10 @@ class Role:
     def __str__(self):
         return f"{self.name} : {self.permissions}"
 
-class Kiosk_User:
+class Permissions_Store: pass # for manipulating masterList of permissions
+class Roles_Store: pass # manipulating masterList for roles and relationship to permissions
+
+class Kiosk_User: # implement in the user class, not a new class
     id : int
     roles : set
     user : User
@@ -49,28 +53,12 @@ class Kiosk_User:
             self.roles.remove(role)
         else: raise Not_A_Role
 
-class User_Session:
-    user : Kiosk_User
-    active_roles : dict
-    id : int
-    def __init__(self, user):
-        self.user = user
-        self.active_roles = {}
-        self.id = user.id
-
-    def add_role(self, role):
-        self.active_roles[role.name] = role
-
-    def drop_role(self, role):
-        del self.active_roles[role.name]
-    
-    def check_permission(self, permission):
-# Iterate through active roles
-        for role in self.active_roles.values():
-# Check if required permission belongs to role
-            if permission in role.permissions:
-                return True
-# Permission not found    
-        return False
-    
-    
+def has_permission(permission, user):
+    def decorator(func):
+        def wrapper(*args, **kwargs):
+            if permission in user.permissions:
+                return func(*args, **kwargs)
+            else:
+                raise PermissionError("Access denied")
+        return wrapper
+    return decorator

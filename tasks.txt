@@ -15,13 +15,20 @@ unit tests:
 complete:
     transaction encoded into json object
     item store logic and unit testing with edge cases
+    transaction unit tested
+    patrons unit tested with edge cases
 
 questions:
     why, when decoding, the json.load is loading the objects correctly but at the end seems to load the whole dictionary?
     where do I store the book logic?
+    can I just make a single user class and set roles later? how would I plan that?
     
 
 3/5/2024 authentication and authorization
 tasks:
     learn role-based authorization
     dependency inversion
+meeting:
+    fix decoder
+    uml class diagrams
+    sequence diagrams

@@ -3,23 +3,34 @@ from users import Patron, Librarian
 from library import Library
 import datetime
 from transaction import Transaction_Store, Transaction
+from admin import Roles_Store
 
 class Not_Book(TypeError): pass
 class Not_Patron(TypeError): pass
 class Not_Librarian(TypeError): pass
-class Kiosk:
+class Kiosk: # add methods for checking permissions
     transaction_store : Transaction_Store
-    def __init__(self, transaction_store):
-        self.transaction_store = transaction_store    
+    role_store : Roles_Store # dependency injection
+    def __init__(self, transaction_store, role_store):
+        self.transaction_store = transaction_store
+        self.role_store = role_store
+    
+    def check_permissions(self, user, permission):
+        user_role_list = user.roles
+        for role in user_role_list:
+            if permission in self.role_store[role]:
+                return True
+        return False
 
-    def checkout_item(self, item, customer): 
-# Validate item and customer
+    def checkout_item(self, item, user): 
+# validate if user has permissions
+# Validate item and customer type
         if not(isinstance(item, Book)):
             return Not_Book
-        if not(isinstance(customer, Patron)):
+        if not(isinstance(user, Patron)):
             return Not_Patron
 # create new transaction
-        new_transaction = Transaction(customer.id, item.id)
+        new_transaction = Transaction(user.id, item.id)
         self.transaction_store.add_transaction(new_transaction)
         receipt = f"{new_transaction.item_id} {new_transaction.customer_id} {new_transaction.checkout_date}"
 # remove the book from the item storage

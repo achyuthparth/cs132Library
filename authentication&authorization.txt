@@ -26,3 +26,15 @@ def delete_user(user_id):
 
 questions about process:
     I will create an admin class to represent permissions, roles, modeling users and sessions, and checking access
+
+roles.json
+permissions.json
+role_permissions.json (explicitly granted, explicitly denied) (access control list)
+i can have only explicit granting in my program
+
+roles.json is the roles master table
+	new definitions of roles will be stored here
+permissions.json is the permissions master table
+	new operations and permissions will be entered here first
+managing permissions at the role level will be changed at the role_permmissions.json file
+add role and delete role would be static methods
