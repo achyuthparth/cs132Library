@@ -1,7 +1,7 @@
 from os import path
 import json
 import file_services as FS
-from admin import Role, Not_A_Role
+#from admin import Role, Not_A_Role
 
 class User:
     name : str
@@ -10,7 +10,6 @@ class User:
     id : int
     roles : set # save just the names, not the role objects themselves
 # using set as appending role to a list would create 2 instances
-class User(User):
     def __init__(self, name, email, number, id, roles = set({})):
         self.name = name
         self.email = email

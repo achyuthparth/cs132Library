@@ -1,19 +1,23 @@
-from item_storage import Book
-from users import User, Librarian
+from item_storage import Book, Book_Storage
+from users import User, User_Storage
 from library import Library
 import datetime
 from transaction import Transaction_Store, Transaction
 from admin import Roles_Store
 
 class Not_Book(TypeError): pass
-class Not_Patron(TypeError): pass
+class Not_User(TypeError): pass
 class Not_Librarian(TypeError): pass
 class Kiosk: # add methods for checking permissions
     transaction_store : Transaction_Store
     role_store : Roles_Store # dependency injection
-    def __init__(self, transaction_store, role_store):
+    book_store : Book_Storage
+    user_store : User_Storage
+    def __init__(self, transaction_store, role_store, book_store, user_store):
         self.transaction_store = transaction_store
         self.role_store = role_store
+        self.book_store = book_store
+        self.user_store = user_store
 
     def check_permissions(self, user, permission):
         user_role_list = user.roles
@@ -22,13 +26,15 @@ class Kiosk: # add methods for checking permissions
                 return True
         return False
 
-    def checkout_item(self, item, user): 
-# validate if user has permissions
+    def checkout_item(self, item, user):
 # Validate item and customer type
         if not(isinstance(item, Book)):
             return Not_Book
         if not(isinstance(user, User)):
-            return Not_Patron
+            return Not_User
+# validate if user has permissions
+        if not(self.check_permissions(user, "checkout_books")):
+            raise PermissionError("Does not have permission to checkout books")
 # create new transaction
         new_transaction = Transaction(user.id, item.id)
         self.transaction_store.add_transaction(new_transaction)

@@ -45,6 +45,13 @@ class Test_Patrons(unittest.TestCase):
         patron_file = self.store
         with self.assertRaises(User_Not_Found):
             patron_file.remove_user(patron_2)
+# add role
+
+# remove role
+
+# add role type error
+
+# remove role type error
 
 if __name__ == "__main__":
     unittest.main()
