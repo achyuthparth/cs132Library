@@ -1,5 +1,5 @@
 from item_storage import Book
-from users import Patron, Librarian
+from users import User, Librarian
 from library import Library
 import datetime
 from transaction import Transaction_Store, Transaction
@@ -14,7 +14,7 @@ class Kiosk: # add methods for checking permissions
     def __init__(self, transaction_store, role_store):
         self.transaction_store = transaction_store
         self.role_store = role_store
-    
+
     def check_permissions(self, user, permission):
         user_role_list = user.roles
         for role in user_role_list:
@@ -27,7 +27,7 @@ class Kiosk: # add methods for checking permissions
 # Validate item and customer type
         if not(isinstance(item, Book)):
             return Not_Book
-        if not(isinstance(user, Patron)):
+        if not(isinstance(user, User)):
             return Not_Patron
 # create new transaction
         new_transaction = Transaction(user.id, item.id)
@@ -45,7 +45,7 @@ class Kiosk: # add methods for checking permissions
     def return_item(self, receipt): # handle edge cases, compute fines
         transaction = self.transaction_store.find_transaction(receipt)
         transaction.return_date = datetime.datetime.utcnow()
-        self.transaction_store.save_to_store()
+        self.transaction_store.write_file()
         return f"{receipt} {transaction.return_date}"
 class Customer_kiosk(Kiosk): pass
 class Librarian_Kiosk(Kiosk): pass

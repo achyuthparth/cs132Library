@@ -25,14 +25,15 @@ class Transaction:
         else: self.fine = self.calculate_fine()
     
     def calculate_fine(self):
+        fine = 0
         if self.return_date == self.checkout_date:
             time_difference = (self.due_date - datetime.datetime.utcnow()).days
         else: time_difference = (self.due_date - self.return_date).days
         if time_difference < 0:
             weeks_passed = abs(time_difference)//7
-            self.fine += weeks_passed
-            return self.fine
-        return self.fine
+            fine += weeks_passed
+            return fine
+        return fine
 
 class Transaction_Store:
     
@@ -42,7 +43,7 @@ class Transaction_Store:
     def find_transaction(self, receipt):
         pass
     
-    def save_to_store(self):
+    def write_file(self):
         pass
 
 class Transaction_Encoder(json.JSONEncoder):
@@ -63,15 +64,17 @@ class Transaction_Decoder(json.JSONDecoder):
         json.JSONDecoder.__init__(self, object_hook = self.to_object)
     
     def to_object(self, d):
-        if d == (None or {}):
-            return {}
+        if d == (None or []):
+            return []
         return Transaction(d["customer_id"], d["item_id"], datetime.datetime.strptime(d["checkout_date"], "%Y-%m-%d %H:%M:%S"), datetime.datetime.strptime(d["return_date"], "%Y-%m-%d %H:%M:%S"), datetime.datetime.strptime(d["due_date"], "%Y-%m-%d %H:%M:%S"), d["fine"])
+
 class No_Transaction_Present(Exception): pass
+
 class Transaction_File(Transaction_Store):
     def __init__(self, file_name = "Transaction_List.json"):
         self.file_name = FS.create_file_path(file_name)
         # error handling for load file
-        self.transactions = self.load_file()
+        self.transactions = self.load_file() # turn this into a list in memory
         if self.transactions is None:
             self.transactions = {}
     
@@ -80,12 +83,18 @@ class Transaction_File(Transaction_Store):
         if file_exists:
             with open(self.file_name, 'r') as file_name:
                 transactions_json = json.load(file_name, cls = Transaction_Decoder)
-        else: transactions_json = {}
-        return transactions_json
+        else: return {}
+        transaction_dict = {}
+        for item in transactions_json:
+            transaction_dict[f"{item.customer_id} {item.item_id} {item.checkout_date}"] = item
+        return transaction_dict
 
-    def write_file(self):
+    def write_file(self): # convert self.transaction into a list
+        transaction_list = []
+        for key, values in self.transactions.items():
+            transaction_list.append(values)
         with open(self.file_name, "w") as file_name:
-            json.dump(self.transactions, file_name, cls = Transaction_Encoder)
+            json.dump(transaction_list, file_name, cls = Transaction_Encoder)
 
     def add_transaction(self, transaction):
         receipt = f"{transaction.customer_id} {transaction.item_id} {transaction.checkout_date}"
@@ -98,6 +107,3 @@ class Transaction_File(Transaction_Store):
                 if key == receipt:
                     return values
         except: No_Transaction_Present
-    
-    def save_to_store(self):
-        self.write_file()
