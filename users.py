@@ -1,3 +1,4 @@
+import uuid
 from os import path
 import json
 import file_services as FS
@@ -10,12 +11,14 @@ class User:
     id : int
     roles : set # save just the names, not the role objects themselves
 # using set as appending role to a list would create 2 instances
-    def __init__(self, name, email, number, id, roles = set({})):
+    def __init__(self, name, email, number, id = None, roles = None):
         self.name = name
         self.email = email
         self.number = number
-        self.id = id
-        self.roles = roles
+        if id is None: self.id = uuid.uuid4()
+        else: self.id = id
+        if roles is None: self.roles = set([])
+        else: self.roles = roles
     
     def add_role(self, role):
         if isinstance(role, str):
@@ -30,6 +33,8 @@ class User:
 class User_Storage:
     def add_user(self, user): pass
     def remove_user(self, user): pass
+    def find_user(self, user): pass
+    def find_user_id(self, user_id): pass
 
 class User_Encoder(json.JSONEncoder):
     def default(self, object):
@@ -55,6 +60,7 @@ class User_Decoder(json.JSONDecoder):
 class Not_A_User(TypeError): pass
 class User_Not_Found(Exception): pass
 class User_Already_Exists(Exception): pass
+
 
 class User_File(User_Storage):
     def __init__(self, file_name = "User_List.json"):
@@ -92,10 +98,28 @@ class User_File(User_Storage):
     def remove_user(self, user):
         user_list = self.users
         if isinstance(user, User):
-            if user.id not in user_list:
+            if not(user.id in user_list):
                 raise User_Not_Found
             else:
                 del user_list[user.id]
         else: raise Not_A_User
         self.write_file()
         return user.id in user_list
+    
+    def find_user(self, user):
+        if not(isinstance(user, User)):
+            print("Input is not a User type")
+            raise Not_A_User
+        else:
+            try:
+                return self.users[user.id]
+            except: User_Not_Found
+    
+    def find_user_id(self, user_id):
+        if not(isinstance(user_id, str)):
+            print("User ID you entered is not a string")
+            raise TypeError("Enter a string")
+        else:
+            try:
+                return self.users[user_id]
+            except: User_Not_Found

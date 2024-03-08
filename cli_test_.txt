@@ -1,0 +1,23 @@
+library.py --checkout bid:<book id> u:<user id>
+ 
+ 
+library.py --checkout -b <book id> -u <lib id>
+Sorry, permission denied for check out.
+ 
+ 
+library.py --addbook -i newbooks.json -u <lib id>
+ 
+library.py --deletebook -b <book id> -u <lib id>
+ 
+library.py --deletebook -b <book id> -u <user id>
+Sorry, permission denied for check out.
+ 
+-------------
+ 
+import uuid
+ 
+# Generate a random UUID
+random_uuid = uuid.uuid4()
+ 
+# Print the UUID
+print(random_uuid)

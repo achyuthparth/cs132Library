@@ -18,17 +18,12 @@ class Book:
 
 class Book_Storage: # abstract storage class, using json now but can use db later
     
-    def add_book(self, book): # for adding a new book to the library
-        pass
-    
-    def delete_book(self, book): # for totally deleting book from library
-        pass
-    
-    def remove_book(self, book): # for checkout method
-        pass
-    
-    def return_book(self, book): # for returning a book after checkout
-        pass
+    def add_book(self, book): pass # for adding a new book to the library
+    def delete_book(self, book): pass # for totally deleting book from library
+    def remove_book(self, book): pass # for checkout method
+    def return_book(self, book): pass # for returning a book after checkout
+    def find_book(self, book): pass # returns book object given book object
+    def find_isbn(self, book_id): pass # returns book object given isbn
 
 class Book_Encoder(json.JSONEncoder): # json encoder/decoder for custom book object
     def default(self, object):
@@ -72,24 +67,28 @@ class Book_File(Book_Storage): # concrete storage class which utilizes json
         return return_dict
     
     def write_file(self):
+        print("Saving book ...")
         book_list = [values for key, values in self.books.items()]
         with open(self.file_name, "w") as file_name:
             json.dump(book_list, file_name, cls = Book_Encoder)
-    
+        print("Book saved")
+
     def find_book(self, book):
         if not(isinstance(book, Book)):
+            print("Item is not a book")
             raise Not_A_Book
         else: 
             try:
-                return self.books(book.isbn)
+                return self.books[book.isbn]
             except: Book_Not_Found
     
     def find_isbn(self, isbn):
         if not(isinstance(isbn, str)):
+            print("ISBN you entered is not a string")
             raise TypeError("Enter a string")
         else: 
             try:
-                return self.books(isbn)
+                return self.books[isbn]
             except: Book_Not_Found
     
     def add_book(self, book):
@@ -100,7 +99,9 @@ class Book_File(Book_Storage): # concrete storage class which utilizes json
             else:
                 self.books[book.isbn].quantity += book.quantity
                 self.books[book.isbn].available += book.quantity
-        else: raise Not_A_Book
+        else: 
+            print("Item added is not a book")
+            raise Not_A_Book
         self.write_file()
     
     def delete_book(self, book):
