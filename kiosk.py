@@ -178,3 +178,13 @@ class Kiosk: # add methods for checking permissions
         print("deleting book")
         self.book_store.delete_book(book)
         return book_isbn
+    
+    def book_details(self, book_isbn):
+# type validation
+        if not(isinstance(book_isbn, str)):
+            raise TypeError("Enter string for book ISBN")
+# finding the book
+        print("finding book")
+        book = self.book_store.find_isbn(book_isbn)
+# returning the book details
+        return book.details()
