@@ -1,74 +1,397 @@
 # Library will be the UI module
 
 import tkinter
-import kiosk
+from kiosk import Kiosk, User_Not_Found, Not_User, Not_Book, Book_Not_Found, Book_None_Available, No_Transaction_Present, User_Already_Exists
+from users import User_File
+from transaction import Transaction_File
+from item_storage import Book_File
+from roles import Role_File
 
-root = Tk()
-root.title("Achyuthaa's Library")
+# initializing file services
+user_store = User_File()
+transaction_store = Transaction_File()
+book_store = Book_File()
+role_store = Role_File()
+my_kiosk = Kiosk(transaction_store, role_store, book_store, user_store)
+logged_user = None
+
 class Library(tkinter.Tk):
     def __init__(self, screenName: str | None = None, baseName: str | None = None, className: str = "Tk", useTk: bool = True, sync: bool = False, use: str | None = None) -> None:
         super().__init__(screenName, baseName, className, useTk, sync, use)
-        container = Frame(self)
+        container = tkinter.Frame(self)
         container.pack(side = 'top', fill = 'both', expand = True)
-        self.Frames = {}
+        self.frames = {}
         
         # frames needed are login frame, action choice frame, action frame
         for F in (Login_Frame, Patron_Frame, Librarian_Frame, Checkout_Frame, Return_Frame, Create_Patron_Frame, Delete_Patron_Frame, Add_Librarian_Frame, Delete_Librarian_Frame, Add_Book_Frame, Delete_Book_Frame, Book_Details_Frame):
             frame = F(container, self)
+            self.frames[F] = frame
             frame.grid(row = 0, column = 0, sticky="nsew")
         
         # Activate frame
         self.show_frame(Login_Frame)
-        goHomeButton = Button(self,
+        
+        # Go home button
+        goHomeButton = tkinter.Button(self,
             text = "Go Home",
             command = lambda: self.show_frame(Login_Frame))
         goHomeButton.pack()
     
+    # function to activate different frame
     def show_frame(self, frame_type_to_show):
-        frame = self.Frames[frame_type_to_show]
-        frame.Reset()
-        frame.tkraise()
+        if frame_type_to_show == Login_Frame:
+            global logged_user
+            logged_user = None
+        
+        # put new frame on old
+        frame = self.frames[frame_type_to_show]
+        tkinter.Frame.destroy(frame)
+        tkinter.Frame.tkraise(frame)
 
 class Login_Frame(tkinter.Frame):
-    def __init__(self, parent, application):
-        self.Application = application
+    def __init__(self, parent, library):
+        # setting up connection to main UI unit
+        self.Library = library
         tkinter.Frame.__init__(self, parent)
         self.login_frame = tkinter.LabelFrame(self, text = "Welcome to the Library")
         
-        self.find_book_details = tkinter.Button(root, row = 5, padx = 3, pady = 3, text = "Find book details using ISBN", command = lambda : Library.show_frame(Book_Details_Frame))
+        # defining button to get book details
+        self.book_details_button = tkinter.Button(self.login_frame, padx = 3, pady = 3, text = "Find book details using ISBN", command = lambda : Library.show_frame(Book_Details_Frame))
         
-        self.variable_login = tkinter.StringVar()
-        self.login_input = tkinter.Entry(root, width = 50, borderwidth = 5)
-        
-        self.login_input.grid(row = 3, column = 4, columnspan = 3, padx = 10, pady = 10)
-        self.login_input.insert("Enter user ID")
+        # creating input box to enter user login information
+        self.user_id = tkinter.StringVar()
+        self.login_input = tkinter.Entry(self.login_frame, width = 50, borderwidth = 5, text = "Enter user ID")
         self.user_id = self.login_input.get()
         
-        self.login_button = tkinter.Button(root, text = "Login", command = self.login, padx = 3, pady = 3, row = 4, column = 4)
-        self.login_input = tkinter.Entry(root, width = 50, borderwidth = 5)
+        # creating button to activate the login
+        self.login_button = tkinter.Button(self.login_frame, text = "Login", command = self.login, padx = 3, pady = 3)
+        
+        # packing to frame
+        self.login_frame.pack()
+        self.book_details_button.pack()
+        self.login_input.pack()
+        self.login_button.pack()
     
-    def login():
-        tkinter.messagebox.showerror()
-    
-    def open_find_book():
-        tkinter.messagebox.showerror()
+    def login(self):
+        try:
+            global logged_user
+            logged_user = my_kiosk.login(self.user_id)
+            if "Patron" in logged_user.roles: Library.show_frame(Patron_Frame)
+            elif "Librarian" in logged_user.roles: Library.show_frame(Librarian_Frame)
+            else: tkinter.messagebox.showerror()
+        except TypeError: tkinter.messagebox.showerror()
+        except User_Not_Found: tkinter.messagebox.showerror()
 
+class Patron_Frame(tkinter.Frame):
+    def __init__(self, parent, library):
+        # setting up connection to main UI unit
+        self.Library = library
+        tkinter.Frame.__init__(self, parent)
+        self.patron_frame = tkinter.LabelFrame(self, text = "Patron Menu")
+        
+        # setting up buttons for action
+        self.checkout_button = tkinter.Button(self.patron_frame, padx = 3, pady = 3, text = "Checkout Book", command = lambda : Library.show_frame(Checkout_Frame))
+        self.return_button = tkinter.Button(self.patron_frame, text = "Return Book", command = lambda : Library.show_frame(Return_Frame))
+        
+        # packing
+        self.checkout_button.pack()
+        self.return_button.pack()
+
+class Librarian_Frame(tkinter.Frame):
+    def __init__(self, parent, library):
+        # setting up connection to main UI unit
+        self.Library = library
+        tkinter.Frame.__init__(self, parent)
+        self.librarian_frame = tkinter.LabelFrame(self, text = "Patron Menu")
+        
+        # setting up buttons for action
+        self.create_patron_button = tkinter.Button(self.librarian_frame, padx = 3, pady = 3, text = "Create Patron", command = lambda : Library.show_frame(Create_Patron_Frame))
+        self.delete_patron_button = tkinter.Button(self.librarian_frame, text = "Delete Patron", command = lambda : Library.show_frame(Delete_Patron_Frame))
+        self.create_librarian_button = tkinter.Button(self.librarian_frame, padx = 3, pady = 3, text = "Create Librarian", command = lambda : Library.show_frame(Add_Librarian_Frame))
+        self.delete_librarian_button = tkinter.Button(self.librarian_frame, text = "Delete Librarian", command = lambda : Library.show_frame(Delete_Librarian_Frame))
+        self.add_book_button = tkinter.Button(self.librarian_frame, padx = 3, pady = 3, text = "Add New Book to Library", command = lambda : Library.show_frame(Add_Book_Frame))
+        self.delete_book_button = tkinter.Button(self.librarian_frame, text = "Remove Book from Library", command = lambda : Library.show_frame(Delete_Book_Frame))
+        
+        #packing
+        self.create_patron_button.pack()
+        self.delete_patron_button.pack()
+        self.create_librarian_button.pack()
+        self.delete_librarian_button.pack()
+        self.add_book_button.pack()
+        self.delete_book_button.pack()
+
+class Checkout_Frame(tkinter.Frame):
+    def __init__(self, parent, library):
+        tkinter.Frame.__init__(self, parent)
+        self.Library = library
+        
+        self.checkout_frame = tkinter.LabelFrame(self, text = "Checkout a Book")
+        
+        self.isbn = tkinter.StringVar()
+        self.isbn_input = tkinter.Entry(self.checkout_frame, width = 50, borderwidth = 5, text = "Enter Book ISBN")
+        self.isbn = self.isbn_input.get()
+        
+        self.details_button = tkinter.Button(self.checkout_frame, text = "Checkout", command = self.checkout_book, padx = 3, pady = 3)
+        
+        self.checkout_frame.pack()
+        self.isbn_input.pack()
+        self.details_button.pack()
     
-    
-    find_book_details = tkinter.Button(root, text = "Find book details using ISBN", command = open_find_book)
-    
+    def checkout_book(self):
+        try: tkinter.messagebox.showinfo(my_kiosk.checkout_item(self.isbn)) # share receipt
+        except PermissionError: tkinter.messagebox.showerror() # permission not granted
+        except Book_Not_Found: return tkinter.messagebox.showerror()
+        except Book_None_Available: return tkinter.messagebox.showerror()
 
 
-class Patron_Frame(tkinter.Frame): pass
-class Librarian_Frame(tkinter.Frame): pass
-class Checkout_Frame(tkinter.Frame): pass
-class Return_Frame(tkinter.Frame): pass
-class Create_Patron_Frame(tkinter.Frame): pass
-class Delete_Patron_Frame(tkinter.Frame): pass
-class Add_Librarian_Frame(tkinter.Frame): pass
-class Delete_Librarian_Frame(tkinter.Frame): pass
-class Add_Book_Frame(tkinter.Frame): pass
-class Delete_Book_Frame(tkinter.Frame): pass
-class Book_Details_Frame(tkinter.Frame): pass
+class Return_Frame(tkinter.Frame):
+    def __init__(self, parent, library):
+        tkinter.Frame.__init__(self, parent)
+        self.Library = library
+        
+        self.return_frame = tkinter.LabelFrame(self, text = "Return a Book")
+        
+        self.isbn = tkinter.StringVar()
+        self.isbn_input = tkinter.Entry(self.return_frame, width = 50, borderwidth = 5, text = "Enter Book ISBN")
+        self.isbn = self.isbn_input.get()
+        
+        
+        self.details_button = tkinter.Button(self.return_frame, text = "Return", command = self.return_book, padx = 3, pady = 3)
+        
+        self.return_frame.pack()
+        self.isbn_input.pack()
+        self.details_button.pack()
+    
+    def return_book(self):
+        try: tkinter.messagebox.showinfo(my_kiosk.return_book(self.isbn)) # share new receipt
+        except PermissionError: tkinter.messagebox.showerror() # permission not granted
+        except Book_Not_Found: return tkinter.messagebox.showerror()
+        except No_Transaction_Present: return tkinter.messagebox.showerror()
 
+class Create_Patron_Frame(tkinter.Frame):
+    def __init__(self, parent, library):
+        tkinter.Frame.__init__(self, parent)
+        self.Library = library
+        
+        self.create_patron_frame = tkinter.LabelFrame(self, text = "Create a Patron Account")
+        
+        # generated id for new account
+        self.id = tkinter.StringVar()
+        
+        # name for new account
+        self.name = tkinter.StringVar()
+        self.name_input = tkinter.Entry(self.create_patron_frame, width = 50, borderwidth = 5, text = "Enter Name")
+        self.name = self.name_input.get()
+        
+        # email for new account
+        self.email = tkinter.StringVar()
+        self.email_input = tkinter.Entry(self.create_patron_frame, width = 50, borderwidth = 5, text = "Enter Email Address")
+        self.email = self.email_input.get()
+        
+        # number for new account
+        self.number = tkinter.StringVar()
+        self.number_input = tkinter.Entry(self.create_patron_frame, width = 50, borderwidth = 5, text = "Enter Phone Number")
+        self.number = self.number_input.get()
+        
+        # activation button
+        self.create_patron_button = tkinter.Button(self.create_patron_frame, text = "Create", command = self.create_patron, padx = 3, pady = 3)
+        
+        # packing
+        self.create_patron_frame.pack()
+        self.name_input.pack()
+        self.email_input.pack()
+        self.number_input.pack()
+        self.create_patron_button.pack()
+        
+    def create_patron(self):
+        try: # returns new patron's ID
+            tkinter.messagebox.showinfo(my_kiosk.create_patron(logged_user, self.name, self.email, self.number))
+        except PermissionError: tkinter.messagebox.showerror()
+        except User_Already_Exists: tkinter.messagebox.showerror()
+
+class Delete_Patron_Frame(tkinter.Frame):
+    def __init__(self, parent, library):
+        tkinter.Frame.__init__(self, parent)
+        self.Library = library
+        
+        self.delete_patron_frame = tkinter.LabelFrame(self, text = "Delete Patron Account")
+        
+        self.patron_id = tkinter.StringVar()
+        self.patron_id_input = tkinter.Entry(self.delete_patron_frame, width = 50, borderwidth = 5, text = "Enter Patron Account ID")
+        self.patron_id = self.patron_id_input.get()
+        
+        self.activate_delete = tkinter.Button(self.delete_patron_frame, text = "Delete", command = self.delete_patron, padx = 3, pady = 3)
+        
+        self.delete_patron_frame.pack()
+        self.patron_id_input.pack()
+        self.activate_delete.pack()
+    
+    def delete_patron(self):
+        try:
+            if not(my_kiosk.delete_patron(self.patron_id)):
+                tkinter.messagebox.showinfo() # removal was successful
+            else: tkinter.messagebox.showinfo() # removal was unsuccessful
+        except User_Not_Found: tkinter.messagebox.showerror()
+
+class Add_Librarian_Frame(tkinter.Frame):
+    def __init__(self, parent, library):
+        tkinter.Frame.__init__(self, parent)
+        self.Library = library
+        
+        self.create_librarian_frame = tkinter.LabelFrame(self, text = "Create a Librarian Account")
+        
+        # generated id for new account
+        self.id = tkinter.StringVar()
+        
+        # name for new account
+        self.name = tkinter.StringVar()
+        self.name_input = tkinter.Entry(self.create_librarian_frame, width = 50, borderwidth = 5, text = "Enter Name")
+        self.name = self.name_input.get()
+        
+        # email for new account
+        self.email = tkinter.StringVar()
+        self.email_input = tkinter.Entry(self.create_librarian_frame, width = 50, borderwidth = 5, text = "Enter Email Address")
+        self.email = self.email_input.get()
+        
+        # number for new account
+        self.number = tkinter.StringVar()
+        self.number_input = tkinter.Entry(self.create_librarian_frame, width = 50, borderwidth = 5, text = "Enter Phone Number")
+        self.number = self.number_input.get()
+        
+        # activation button
+        self.create_librarian_button = tkinter.Button(self.create_librarian_frame, text = "Create", command = self.create_librarian, padx = 3, pady = 3)
+        
+        # packing
+        self.create_librarian_frame.pack()
+        self.name_input.pack()
+        self.email_input.pack()
+        self.number_input.pack()
+        self.create_librarian_button.pack()
+        
+    def create_librarian(self):
+        try: # returns new patron's ID
+            tkinter.messagebox.showinfo(my_kiosk.create_librarian(logged_user, self.name, self.email, self.number))
+        except PermissionError: tkinter.messagebox.showerror()
+        except User_Already_Exists: tkinter.messagebox.showerror()
+
+class Delete_Librarian_Frame(tkinter.Frame):
+    def __init__(self, parent, library):
+        tkinter.Frame.__init__(self, parent)
+        self.Library = library
+        
+        self.delete_librarian_frame = tkinter.LabelFrame(self, text = "Delete Librarian Account")
+        
+        self.librarian_id = tkinter.StringVar()
+        self.librarian_id_input = tkinter.Entry(self.delete_librarian_frame, width = 50, borderwidth = 5, text = "Enter Librarian Account ID")
+        self.librarian_id = self.librarian_id_input.get()
+        
+        self.activate_delete = tkinter.Button(self.delete_librarian_frame, text = "Delete", command = self.delete_librarian, padx = 3, pady = 3)
+        
+        self.delete_librarian_frame.pack()
+        self.librarian_id_input.pack()
+        self.activate_delete.pack()
+    
+    def delete_librarian(self):
+        try:
+            if not(my_kiosk.delete_librarian(self.librarian_id)):
+                tkinter.messagebox.showinfo() # removal was successful
+            else: tkinter.messagebox.showinfo() # removal was unsuccessful
+        except User_Not_Found: tkinter.messagebox.showerror()
+
+
+class Add_Book_Frame(tkinter.Frame):
+    def __init__(self, parent, library):
+        tkinter.Frame.__init__(self, parent)
+        self.Library = library
+        
+        self.add_book_frame = tkinter.LabelFrame(self, text = "Add New Book to Library")
+        
+        # title
+        self.title = tkinter.StringVar()
+        self.title_input = tkinter.Entry(self.add_book_frame, width = 50, borderwidth = 5, text = "Enter Title")
+        self.title = self.title_input.get()
+        
+        # author
+        self.author = tkinter.StringVar()
+        self.author_input = tkinter.Entry(self.add_book_frame, width = 50, borderwidth = 5, text = "Enter Author")
+        self.author = self.author_input.get()
+        
+        # number of books
+        self.number = tkinter.StringVar()
+        self.number_input = tkinter.Entry(self.add_book_frame, width = 50, borderwidth = 5, text = "Enter Quantity")
+        self.number = self.number_input.get()
+        
+        # activation button
+        self.add_book_button = tkinter.Button(self.add_book_frame, text = "Add", command = self.add_book, padx = 3, pady = 3)
+        
+        # packing
+        self.add_book_frame.pack()
+        self.title_input.pack()
+        self.author_input.pack()
+        self.number_input.pack()
+        self.add_book_button.pack()
+        
+    def add_book(self):
+        try: # returns new patron's ID
+            (my_kiosk.add_book(logged_user, self.title, self.author, self.number, self.number))
+            tkinter.messagebox.showinfo("Success")
+        except PermissionError: tkinter.messagebox.showerror()
+
+class Delete_Book_Frame(tkinter.Frame):
+    def __init__(self, parent, library):
+        tkinter.Frame.__init__(self, parent)
+        self.Library = library
+        
+        self.delete_book_frame = tkinter.LabelFrame(self, text = "Remove Book from Library")
+        
+        self.book_id = tkinter.StringVar()
+        self.book_id_input = tkinter.Entry(self.delete_book_frame, width = 50, borderwidth = 5, text = "Enter Book ISBN")
+        self.book_id = self.book_id_input.get()
+        
+        self.activate_delete = tkinter.Button(self.delete_book_frame, text = "Delete", command = self.delete_book, padx = 3, pady = 3)
+        
+        self.delete_book_frame.pack()
+        self.book_id_input.pack()
+        self.activate_delete.pack()
+    
+    def delete_book(self):
+        try:
+            tkinter.messagebox.showinfo(my_kiosk.delete_book(self.book_id))
+        except Book_Not_Found: tkinter.messagebox.showerror()
+        except Book_None_Available: tkinter.messagebox.showerror()
+
+class Book_Details_Frame(tkinter.Frame):
+    def __init__(self, parent, library):
+        tkinter.Frame.__init__(self, parent)
+        self.Library = library
+        
+        self.book_details_frame = tkinter.LabelFrame(self, text = "Explore Book Details")
+        
+        # creating input box to get details via isbn
+        self.isbn = tkinter.StringVar()
+        self.isbn_input = tkinter.Entry(self.book_details_frame, width = 50, borderwidth = 5, text = "Enter Book ISBN")
+        self.isbn = self.isbn_input.get()
+        
+        # button to find the book
+        self.details_button = tkinter.Button(self.book_details_frame, text = "Return Details", command = self.book_details, padx = 3, pady = 3)
+        
+        # list all books button
+        self.list_all = tkinter.Button(self.book_details_frame, text = "Return All Books", command = self.list_books, padx = 3, pady = 3)
+        
+        # pack to frame
+        self.book_details_frame.pack()
+        self.isbn_input.pack()
+        self.details_button.pack()
+        self.list_all.pack()
+    
+    def book_details(self): tkinter.messagebox.showinfo(f"{my_kiosk.book_details(self.isbn)}")
+    
+    def list_books(self):
+        str_lst = []
+        for key, values in book_store.items():
+            str_lst.append(f"\nISBN : {key} \nTitle: {values.title} \nAuthor: {values.author} \nCopies Available: {values.available}\n")
+        tkinter.messagebox.showinfo(str_lst)
+
+
+root = Library()
 root.mainloop()

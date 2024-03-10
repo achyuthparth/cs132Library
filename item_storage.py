@@ -7,11 +7,12 @@ class Book:
     isbn : str
     quantity : int
     available : int
-    def __init__(self, title, author, isbn, quantity = 1):
+    def __init__(self, title, author, isbn, quantity = 1, available = 0):
         self.title = title
         self.author = author
         self.isbn = isbn
         self.quantity = quantity
+        self.available = available
     
     def details(self):
         return f"Title: {self.title}, Author: {self.author}, ISBN: {self.isbn}, Quantity: {self.quantity}, Available: {self.available}"
@@ -44,7 +45,7 @@ class Book_Decoder(json.JSONDecoder):
     def to_object(self, d):
         if d == ([] or None):
             return []
-        return Book(d["title"], d["id"], d["author"], d["isbn"], d["quantity"], d["available"])
+        return Book(d["title"], d["author"], d["isbn"], d["quantity"], d["available"])
 class Book_Not_Found(Exception): pass
 class Book_None_Available(Exception): pass
 class Not_A_Book(TypeError): pass
@@ -59,7 +60,7 @@ class Book_File(Book_Storage): # concrete storage class which utilizes json
         file_exists = path.exists(self.file_name)
         if file_exists:
             with open(self.file_name, "r") as file_name:
-                books_json = json.loads(file_name, cls = Book_Decoder)
+                books_json = json.load(file_name, cls = Book_Decoder)
         else: return {}
         return_dict = {}
         for item in books_json:

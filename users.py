@@ -90,7 +90,7 @@ class User_File(User_Storage):
         if isinstance(user, User):
             if user.id not in user_list:
                 user_list[user.id] = user
-            else: raise User_Already_Exists
+            else: raise User_Already_Exists # I think this is bad logic, I should check name,number,email
         else: raise Not_A_User
         self.write_file()
         return user.id in user_list

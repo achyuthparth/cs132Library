@@ -32,3 +32,9 @@ meeting:
     fix decoder
     uml class diagrams
     sequence diagrams
+
+3/9/2024
+fix:
+    messagebox
+    frame.reset()
+    frame.raise()

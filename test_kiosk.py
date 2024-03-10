@@ -39,14 +39,14 @@ class TestKiosk(unittest.TestCase):
     def test_return_item1(self):
         kiosk = TestKiosk.kiosk
         receipt = TestKiosk.cls_r1
-        receipt1 = kiosk.return_item(receipt)
+        receipt1 = kiosk.return_book(receipt)
         test_receipt = f"{TestKiosk.cls_r1} {datetime.datetime.utcnow()}"
         print(f"\n{receipt1}\n{test_receipt}\n")
     
     def test_return_item2(self):
         kiosk = TestKiosk.kiosk
         receipt = TestKiosk.cls_r2
-        receipt2 = kiosk.return_item(receipt)
+        receipt2 = kiosk.return_book(receipt)
         test_receipt = f"{TestKiosk.cls_r2} {datetime.datetime.utcnow()}"
         print(f"\n{receipt2}\n{test_receipt}\n")
     
