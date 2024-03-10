@@ -1,11 +1,13 @@
 # Library will be the UI module
 
 import tkinter
+from tkinter import *
 from kiosk import Kiosk, User_Not_Found, Not_User, Not_Book, Book_Not_Found, Book_None_Available, No_Transaction_Present, User_Already_Exists
 from users import User_File
 from transaction import Transaction_File
 from item_storage import Book_File
 from roles import Role_File
+from tkinter import messagebox
 
 # initializing file services
 user_store = User_File()
@@ -78,9 +80,9 @@ class Login_Frame(tkinter.Frame):
             logged_user = my_kiosk.login(self.user_id)
             if "Patron" in logged_user.roles: Library.show_frame(Patron_Frame)
             elif "Librarian" in logged_user.roles: Library.show_frame(Librarian_Frame)
-            else: tkinter.messagebox.showerror()
-        except TypeError: tkinter.messagebox.showerror()
-        except User_Not_Found: tkinter.messagebox.showerror()
+            else: messagebox.showerror("User role does not exist")
+        except TypeError: messagebox.showerror("Type error")
+        except User_Not_Found: messagebox.showerror("User not found")
 
 class Patron_Frame(tkinter.Frame):
     def __init__(self, parent, library):
@@ -97,7 +99,7 @@ class Patron_Frame(tkinter.Frame):
         self.checkout_button.pack()
         self.return_button.pack()
 
-class Librarian_Frame(tkinter.Frame):
+class Librarian_Frame(tkinter.Frame): # add generating reports
     def __init__(self, parent, library):
         # setting up connection to main UI unit
         self.Library = library
@@ -139,9 +141,9 @@ class Checkout_Frame(tkinter.Frame):
     
     def checkout_book(self):
         try: tkinter.messagebox.showinfo(my_kiosk.checkout_item(self.isbn)) # share receipt
-        except PermissionError: tkinter.messagebox.showerror() # permission not granted
-        except Book_Not_Found: return tkinter.messagebox.showerror()
-        except Book_None_Available: return tkinter.messagebox.showerror()
+        except PermissionError: messagebox.showerror("Permission not granted") # permission not granted
+        except Book_Not_Found: messagebox.showerror("Book not found")
+        except Book_None_Available: messagebox.showerror("Book not available")
 
 
 class Return_Frame(tkinter.Frame):
@@ -163,10 +165,10 @@ class Return_Frame(tkinter.Frame):
         self.details_button.pack()
     
     def return_book(self):
-        try: tkinter.messagebox.showinfo(my_kiosk.return_book(self.isbn)) # share new receipt
-        except PermissionError: tkinter.messagebox.showerror() # permission not granted
-        except Book_Not_Found: return tkinter.messagebox.showerror()
-        except No_Transaction_Present: return tkinter.messagebox.showerror()
+        try: messagebox.showinfo(my_kiosk.return_book(self.isbn)) # share new receipt
+        except PermissionError: messagebox.showerror("Permission not granted") # permission not granted
+        except Book_Not_Found: messagebox.showerror("Book not found")
+        except No_Transaction_Present: messagebox.showerror("Transaction does not exist")
 
 class Create_Patron_Frame(tkinter.Frame):
     def __init__(self, parent, library):
@@ -205,9 +207,9 @@ class Create_Patron_Frame(tkinter.Frame):
         
     def create_patron(self):
         try: # returns new patron's ID
-            tkinter.messagebox.showinfo(my_kiosk.create_patron(logged_user, self.name, self.email, self.number))
-        except PermissionError: tkinter.messagebox.showerror()
-        except User_Already_Exists: tkinter.messagebox.showerror()
+            messagebox.showinfo(my_kiosk.create_patron(logged_user, self.name, self.email, self.number))
+        except PermissionError: messagebox.showerror("Permission not granted")
+        except User_Already_Exists: messagebox.showerror("User already exists")
 
 class Delete_Patron_Frame(tkinter.Frame):
     def __init__(self, parent, library):
@@ -229,9 +231,9 @@ class Delete_Patron_Frame(tkinter.Frame):
     def delete_patron(self):
         try:
             if not(my_kiosk.delete_patron(self.patron_id)):
-                tkinter.messagebox.showinfo() # removal was successful
-            else: tkinter.messagebox.showinfo() # removal was unsuccessful
-        except User_Not_Found: tkinter.messagebox.showerror()
+                messagebox.showinfo(f"Successfully deleted {self.patron_id}") # removal was successful
+            else: messagebox.showinfo(f"Deletion unsuccesful") # removal was unsuccessful
+        except User_Not_Found: messagebox.showerror("User not found")
 
 class Add_Librarian_Frame(tkinter.Frame):
     def __init__(self, parent, library):
@@ -270,9 +272,9 @@ class Add_Librarian_Frame(tkinter.Frame):
         
     def create_librarian(self):
         try: # returns new patron's ID
-            tkinter.messagebox.showinfo(my_kiosk.create_librarian(logged_user, self.name, self.email, self.number))
-        except PermissionError: tkinter.messagebox.showerror()
-        except User_Already_Exists: tkinter.messagebox.showerror()
+            messagebox.showinfo(my_kiosk.create_librarian(logged_user, self.name, self.email, self.number))
+        except PermissionError: messagebox.showerror("Permission not granted")
+        except User_Already_Exists: messagebox.showerror("User already exists")
 
 class Delete_Librarian_Frame(tkinter.Frame):
     def __init__(self, parent, library):
@@ -294,9 +296,9 @@ class Delete_Librarian_Frame(tkinter.Frame):
     def delete_librarian(self):
         try:
             if not(my_kiosk.delete_librarian(self.librarian_id)):
-                tkinter.messagebox.showinfo() # removal was successful
-            else: tkinter.messagebox.showinfo() # removal was unsuccessful
-        except User_Not_Found: tkinter.messagebox.showerror()
+                messagebox.showinfo(f"{self.librarian_id} removed successful") # removal was successful
+            else: messagebox.showinfo("Removal failed") # removal was unsuccessful
+        except User_Not_Found: messagebox.showerror("User not found")
 
 
 class Add_Book_Frame(tkinter.Frame):
@@ -334,8 +336,8 @@ class Add_Book_Frame(tkinter.Frame):
     def add_book(self):
         try: # returns new patron's ID
             (my_kiosk.add_book(logged_user, self.title, self.author, self.number, self.number))
-            tkinter.messagebox.showinfo("Success")
-        except PermissionError: tkinter.messagebox.showerror()
+            messagebox.showinfo("Success")
+        except PermissionError: messagebox.showerror("Permission not granted")
 
 class Delete_Book_Frame(tkinter.Frame):
     def __init__(self, parent, library):
@@ -355,10 +357,9 @@ class Delete_Book_Frame(tkinter.Frame):
         self.activate_delete.pack()
     
     def delete_book(self):
-        try:
-            tkinter.messagebox.showinfo(my_kiosk.delete_book(self.book_id))
-        except Book_Not_Found: tkinter.messagebox.showerror()
-        except Book_None_Available: tkinter.messagebox.showerror()
+        try: messagebox.showinfo(my_kiosk.delete_book(self.book_id))
+        except Book_Not_Found: messagebox.showerror("Book not found")
+        except Book_None_Available: messagebox.showerror("Book not available")
 
 class Book_Details_Frame(tkinter.Frame):
     def __init__(self, parent, library):
@@ -384,13 +385,13 @@ class Book_Details_Frame(tkinter.Frame):
         self.details_button.pack()
         self.list_all.pack()
     
-    def book_details(self): tkinter.messagebox.showinfo(f"{my_kiosk.book_details(self.isbn)}")
+    def book_details(self): messagebox.showinfo(f"{my_kiosk.book_details(self.isbn)}")
     
     def list_books(self):
         str_lst = []
         for key, values in book_store.items():
             str_lst.append(f"\nISBN : {key} \nTitle: {values.title} \nAuthor: {values.author} \nCopies Available: {values.available}\n")
-        tkinter.messagebox.showinfo(str_lst)
+        messagebox.showinfo(f"Entire catalog: \n{str_lst}")
 
 
 root = Library()

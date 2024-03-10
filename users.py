@@ -111,8 +111,7 @@ class User_File(User_Storage):
             print("Input is not a User type")
             raise Not_A_User
         else:
-            try:
-                return self.users[user.id]
+            try: return self.users[user.id]
             except: User_Not_Found
     
     def find_user_id(self, user_id):

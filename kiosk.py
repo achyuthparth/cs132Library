@@ -92,7 +92,7 @@ class Kiosk: # add methods for checking permissions
         except Book_Not_Found: return Book_Not_Found
         
         # return new receipt
-        return f"{receipt} {transaction.return_date}"
+        return f"Receipt Code: {receipt} \nReturn Date: {transaction.return_date} \nFines: {transaction.fine}"
     
     def create_patron(self, user, name, email, number):
         # Type check
