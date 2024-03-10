@@ -1,7 +1,7 @@
 # Kiosk will be the logic to handle all the actions internally
 
 from item_storage import Book, Book_Storage
-from users import User, User_Storage
+from users import User, User_Storage, User_Not_Found
 from library import Library
 import datetime
 from transaction import Transaction_Store, Transaction
@@ -20,6 +20,15 @@ class Kiosk: # add methods for checking permissions
         self.role_store = role_store
         self.book_store = book_store
         self.user_store = user_store
+        
+    def login(self, user_id):
+        # Validate user type
+        if not(isinstance(user_id, str)):
+            raise TypeError("Enter a string for user ID")
+        
+        
+        user = self.user_store.find_user_id(user_id)
+        
 
     def check_permissions(self, user, permission):
         user_role_list = user.roles
