@@ -37,7 +37,7 @@ class Kiosk: # add methods for checking permissions
                 return True
         return False
 
-    def checkout_item(self, item, user):
+    def checkout_item(self, user, item):
         # Validate customer type
         if not(isinstance(user, User)):
             print("Checkout user is not a user")
@@ -237,7 +237,8 @@ class Kiosk: # add methods for checking permissions
         
         # finding the book
         print("finding book")
-        book = self.book_store.find_isbn(book_isbn)
-        
+        try: book = self.book_store.find_isbn(book_isbn)
+        except Book_Not_Found: raise Book_Not_Found
         # returning the book details
-        return book.details()
+        if book is None: raise Book_Not_Found
+        return Book.details(book)

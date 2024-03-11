@@ -8,7 +8,7 @@ class User:
     name : str
     email : str
     number : str
-    id : int
+    id : str
     roles : set # save just the names, not the role objects themselves
 # using set as appending role to a list would create 2 instances
     def __init__(self, name, email, number, id = None, roles = None):
@@ -55,7 +55,7 @@ class User_Decoder(json.JSONDecoder):
     def to_object(self, d): # turn this into a list 
         if d == (None or {}):
             return []
-        return User(d["name"], d["email"], d["number"], d["id"], set(d["roles"])) # converting list back into set
+        return User(d["name"], d["email"], d["number"], str(d["id"]), set(d["roles"])) # converting list back into set
 
 class Not_A_User(TypeError): pass
 class User_Not_Found(Exception): pass

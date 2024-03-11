@@ -89,7 +89,9 @@ class Book_File(Book_Storage): # concrete storage class which utilizes json
             raise TypeError("Enter a string")
         else: 
             try:
-                return self.books[isbn]
+                if isbn in self.books:
+                    return self.books[isbn]
+                else: Book_Not_Found
             except: Book_Not_Found
     
     def add_book(self, book):
